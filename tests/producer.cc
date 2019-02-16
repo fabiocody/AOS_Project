@@ -19,5 +19,7 @@ int main() {
         msg.set_str(input);
         fifo.send_msg(msg);
     } while (input != "exit");
+    msg = *fifo.recv_msg();
+    cout << msg.str() << endl;
     return 0;
 }

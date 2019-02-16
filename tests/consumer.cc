@@ -16,5 +16,8 @@ int main() {
         msg = fifo.recv_msg();
         cout << msg->str() << endl;
     } while (msg->str() != "exit");
+    msg->set_str("Nel mezzo del cammin di nostra vita");
+    cout << msg->str() << endl;
+    fifo.send_msg(*msg);
     return 0;
 }
