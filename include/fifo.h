@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "utils.h"
 
 #define CHUNK_SIZE 1024
 
@@ -50,9 +51,11 @@ public:
         buffer = malloc(buffer_size);
         if (buffer == NULL)
             buffer_allocation_error();
+        dout << "Created FIFO " << fifoname << std::endl;
     }
 
     virtual ~Fifo() {
+        dout << "Releasing FIFO " << fifoname << std::endl;
         close(fd);
         unlink(fifoname);
         free(fifoname);
@@ -67,18 +70,20 @@ public:
             if (buffer == NULL)
                 buffer_allocation_error();
         }
-        ssize_t written_bytes = write(fd, &msg_size, sizeof(size_t));
+        write(fd, &msg_size, sizeof(size_t));
         msg.SerializeToArray(buffer, msg_size);
-        written_bytes = write(fd, buffer, msg_size);
+        ssize_t written_bytes = write(fd, buffer, msg_size);
+        dout << written_bytes << " bytes sent" << std::endl;
         return written_bytes;
     }
 
     std::shared_ptr<T> recv_msg() {
         size_t msg_size;
         read(fd, &msg_size, sizeof(size_t));
-        read(fd, buffer, msg_size);
+        ssize_t read_bytes = read(fd, buffer, msg_size);
         std::shared_ptr<T> msg = std::make_shared<T>();
         msg->ParseFromArray(buffer, (int)msg_size);
+        dout << read_bytes << " bytes read" << std::endl;
         return msg;
     }
 

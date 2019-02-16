@@ -7,6 +7,7 @@
 
 using namespace std;
 
+
 int main() {
     string fifoname = "/tmp/testfifo";
     const char *c_fifoname = fifoname.c_str();
@@ -20,6 +21,7 @@ int main() {
         fifo.send_msg(msg);
     } while (input != "exit");
     msg = *fifo.recv_msg();
-    cout << msg.str() << endl;
+    cout << ">>> " << msg.str() << endl;
+    fifo.send_msg(msg);
     return 0;
 }
