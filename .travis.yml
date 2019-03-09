@@ -1,3 +1,8 @@
 language: cpp
-install: protobuf-compiler
+
+addons:
+  apt:
+    packages:
+      - protobuf-compilier
+
 script: mkdir build && cd build && cmake .. && make
