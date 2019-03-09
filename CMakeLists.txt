@@ -8,7 +8,7 @@ set(INCLUDE_DIR include)
 set(SOURCE_DIR src)
 set(PROTO_DIR proto)
 set(TESTS_DIR tests)
-set(BARBEQUE_INCLUDE "../BOSP/barbeque/include")
+# set(BARBEQUE_INCLUDE "../BOSP/barbeque/include")
 
 if (DEBUG)
     set(CMAKE_CXX_FLAGS "-DDEBUG")
