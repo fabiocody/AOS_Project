@@ -23,12 +23,6 @@ private:
     size_t buffer_size;
     void *buffer;
 
-    Fifo():
-        fd(0),
-        fifoname(nullptr),
-        buffer_size(CHUNK_SIZE),
-        buffer(nullptr) {}
-
     void buffer_allocation_error() {
         perror("Cannot allocate buffer");
         close(fd);
@@ -38,7 +32,7 @@ private:
 
 public:
 
-    explicit Fifo(const char *filename):
+    Fifo(const char *filename):
             buffer_size(CHUNK_SIZE) {
         fifoname = strdup(filename);
         mkfifo(filename, S_IRUSR | S_IWUSR);
@@ -54,6 +48,8 @@ public:
         dout << "Created FIFO " << fifoname << std::endl;
     }
 
+    Fifo(const std::string & fifoname): Fifo(fifoname.c_str()) {}
+
     virtual ~Fifo() {
         dout << "Releasing FIFO " << fifoname << std::endl;
         close(fd);
@@ -62,7 +58,7 @@ public:
         free(buffer);
     }
 
-    ssize_t send_msg(const T & msg) {
+    virtual ssize_t send_msg(const T & msg) {
         size_t msg_size = msg.ByteSizeLong();
         if (msg_size > buffer_size) {
             buffer_size = msg_size + CHUNK_SIZE;
@@ -77,7 +73,7 @@ public:
         return written_bytes;
     }
 
-    std::shared_ptr<T> recv_msg() {
+    virtual std::shared_ptr<T> recv_msg() {
         size_t msg_size;
         read(fd, &msg_size, sizeof(size_t));
         ssize_t read_bytes = read(fd, buffer, msg_size);

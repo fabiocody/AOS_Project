@@ -8,38 +8,38 @@ syntax = "proto3";
  * The higer the message id the higer the message priority.
  */
 enum rpc_msg_type {
-	//--- Application Originated Messages
-	RPC_APP_PAIR = 0;
-	RPC_APP_EXIT = 1;
+    //--- Application Originated Messages
+    RPC_APP_PAIR = 0;
+    RPC_APP_EXIT = 1;
 
-	RPC_APP_RESP = 2;          ///< Response to an APP request
-	RPC_APP_MSGS_COUNT = 3;    ///< The number of APP originated messages
+    RPC_APP_RESP = 2;          ///< Response to an APP request
+    RPC_APP_MSGS_COUNT = 3;    ///< The number of APP originated messages
 
-	//--- Execution Context Originated Messages
-	RPC_EXC_SCHEDULE = 4;
-	RPC_EXC_START = 5;
-	RPC_EXC_SET = 6;
-	RPC_EXC_CLEAR = 7;
-	RPC_EXC_STOP = 8;
-	RPC_EXC_REGISTER = 9;
-	RPC_EXC_RTNOTIFY = 10;
-	RPC_EXC_UNREGISTER = 11;
+    //--- Execution Context Originated Messages
+    RPC_EXC_SCHEDULE = 4;
+    RPC_EXC_START = 5;
+    RPC_EXC_SET = 6;
+    RPC_EXC_CLEAR = 7;
+    RPC_EXC_STOP = 8;
+    RPC_EXC_REGISTER = 9;
+    RPC_EXC_RTNOTIFY = 10;
+    RPC_EXC_UNREGISTER = 11;
 
-	RPC_EXC_RESP = 12;          ///< Response to an EXC request
-	RPC_EXC_MSGS_COUNT = 13;    ///< The number of EXC originated messages
+    RPC_EXC_RESP = 12;          ///< Response to an EXC request
+    RPC_EXC_MSGS_COUNT = 13;    ///< The number of EXC originated messages
 
 
-	//--- Barbeque Originated Messages
-	RPC_BBQ_SYNCP_POSTCHANGE = 14;
-	RPC_BBQ_SYNCP_DOCHANGE = 15;
-	RPC_BBQ_SYNCP_SYNCCHANGE = 16;
-	RPC_BBQ_SYNCP_PRECHANGE = 17;
+    //--- Barbeque Originated Messages
+    RPC_BBQ_SYNCP_POSTCHANGE = 14;
+    RPC_BBQ_SYNCP_DOCHANGE = 15;
+    RPC_BBQ_SYNCP_SYNCCHANGE = 16;
+    RPC_BBQ_SYNCP_PRECHANGE = 17;
 
-	RPC_BBQ_STOP_EXECUTION = 18;
-	RPC_BBQ_GET_PROFILE = 19;
+    RPC_BBQ_STOP_EXECUTION = 18;
+    RPC_BBQ_GET_PROFILE = 19;
 
-	RPC_BBQ_RESP = 20;         ///< Response to a BBQ command
-	RPC_BBQ_MSGS_COUNT = 21;   ///< The number of EXC originated messages
+    RPC_BBQ_RESP = 20;         ///< Response to a BBQ command
+    RPC_BBQ_MSGS_COUNT = 21;   ///< The number of EXC originated messages
 }
 
 
@@ -65,10 +65,10 @@ enum RTLIB_ProgrammingLanguage {
  * @ingroup rtlib_sec03_plain_constr
  */
 enum RTLIB_ConstraintOperation {
-	/** Remove the specified constraint */
-	CONSTRAINT_REMOVE = 0;
-	/** Add the specified constraint */
-	CONSTRAINT_ADD = 1;
+    /** Remove the specified constraint */
+    CONSTRAINT_REMOVE = 0;
+    /** Add the specified constraint */
+    CONSTRAINT_ADD = 1;
 }
 
 
@@ -81,12 +81,12 @@ enum RTLIB_ConstraintOperation {
  * recipe.
  */
 enum RTLIB_ConstraintType {
-	/** Targets AWMs lower or equal to the specified one */
-	LOWER_BOUND = 0;
-	/** Targets AWMs higher or equal to the specified one */
-	UPPER_BOUND = 1;
-	/** Targets the specified AWM */
-	EXACT_VALUE = 2;
+    /** Targets AWMs lower or equal to the specified one */
+    LOWER_BOUND = 0;
+    /** Targets AWMs higher or equal to the specified one */
+    UPPER_BOUND = 1;
+    /** Targets the specified AWM */
+    EXACT_VALUE = 2;
 }
 
 
@@ -99,12 +99,12 @@ enum RTLIB_ConstraintType {
  * constraints at run-time, to invalidate a subset of its own working modes.
  */
 message RTLIB_Constraint {
-	/** The identified of an Application Working Mode (AWM) */
-	uint32 awm = 1;
-	/** The required operation on the previous AWM */
-	RTLIB_ConstraintOperation operation = 2;
-	/** The constraint boundary */
-	RTLIB_ConstraintType type = 3;
+    /** The identified of an Application Working Mode (AWM) */
+    uint32 awm = 1;
+    /** The required operation on the previous AWM */
+    RTLIB_ConstraintOperation operation = 2;
+    /** The constraint boundary */
+    RTLIB_ConstraintType type = 3;
 };
 
 
@@ -113,15 +113,15 @@ message RTLIB_Constraint {
  */
 message rpc_msg_header {
     /** The command to execute (defines the message "payload" type) */
-    uint32 typ = 1;
+    rpc_msg_type typ = 1;
     /** A token used by the message sender to match responses */
     uint32 token = 2;
-// FIXME These is maybe superfluous... it is required just for the pairing
-// Then it is better to exchange a communication token ;-)
-	/** The application ID (thread ID) */
+    // FIXME These is maybe superfluous... it is required just for the pairing
+    // Then it is better to exchange a communication token ;-)
+    /** The application ID (thread ID) */
     uint32 app_pid = 3;
-// FIXME This is required just by EXC related messages: better to move there
-	/** The execution context ID */
+    // FIXME This is required just by EXC related messages: better to move there
+    /** The execution context ID */
     uint32 exc_id = 4;
 }
 
@@ -134,268 +134,49 @@ message rpc_msg_resp {
     rpc_msg_header hdr = 1;
     /** The RTLIB command exit code */
     uint32 result = 2;
+    /** An estimation of the Synchronization Latency */
+    uint32 syncLatency = 3;
 }
 
 
-/**********************
- * Channel Management *
- **********************/
-
-/**
- * @brief Command to register a new execution context.
- */
-message rpc_msg_APP_PAIR {
-    /** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-	/** The RPC protocol major version */
-	uint32 mjr_version = 2;
-	/** The RPC protocol minor version */
-	uint32 mnr_version = 3;
-	/** The name of the application */
+message rpc_msg {
+    rpc_msg_header hdr = 1;
+    uint32 mjr_version = 2;
+    uint32 mnr_version = 3;
     string app_name = 4;
-}
-
-
-/**
- * @brief Command to notify an application is exiting.
- */
-message rpc_msg_APP_EXIT {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-}
-
-
-/******************************************************************************
- * Execution Context Requests
- ******************************************************************************/
-
-/**
- * @brief Command to register a new execution context.
- */
-message rpc_msg_EXC_REGISTER {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-	/** The name of the registered execution context */
-	string exc_name = 2;
-	/** The name of the required recipe */
-	string recipe = 3;
-	/** The code language class */
-	RTLIB_ProgrammingLanguage lang = 4;
-}
-
-
-/**
- * @brief Command to unregister an execution context.
- */
-message rpc_msg_EXC_UNREGISTER {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-	/** The name of the execution context */
-	string exc_name = 2;
-}
-
-
-/**
- * @brief Command to set constraints on an execution context.
- */
-message rpc_msg_EXC_SET {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-	/** The count of following constrains */
-	uint32 count = 2;
-	/** The set of asserted constraints */
-	RTLIB_Constraint constraints = 3;
-}
-
-
-/**
- * @brief Command to clear constraints on an execution context.
- */
-message rpc_msg_EXC_CLEAR {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-}
-
-
-/**
- * @brief Command to set a Goal-Gap on an execution context.
- */
-message rpc_msg_EXC_RTNOTIFY {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-	/** The asserted Goal-Gap */
-	sint32 gap = 2;
-	sint32 cusage = 3;
-	sint32 ctime_ms = 4;
-}
-
-
-/**
- * @brief Command to start an execution context.
- */
-message rpc_msg_EXC_START {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-}
-
-
-/**
- * @brief Command to stop an execution context.
- */
-message rpc_msg_EXC_STOP {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-}
-
-
-/**
- * @brief Command to ask for being scheduled.
- *
- * This message is send by the RTLIB once an EXC ask the RTRM to be scheduled
- * (as soon as possible). The RTRM should identify the best AWM to be assigned
- * for the requesting execution context.
- */
-message rpc_msg_EXC_SCHEDULE {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-}
-
-
-/******************************************************************************
- * Synchronization Protocol Messages
- ******************************************************************************/
-
-//----- PreChange
-
-/**
- * @brief Synchronization Protocol PreChange command
- */
-message rpc_msg_BBQ_SYNCP_PRECHANGE {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-	/** Synchronization Action required */
-	uint32 event = 2;
-	/** The selected AWM */
-	sint32 awm = 3;
-    /** CONFIG_BBQUE_CGROUPS_DISTRIBUTED_ACTUATION */
-	uint64 cpu_ids = 4;
-	uint64 cpu_ids_isolation = 5;
-	uint64 mem_ids = 6;
-	/** The number of systems assigned, that corresponds
-	 * to the number of subsequent rpc_msg_BBQ_SYNCP_PRECHANGE_SYSTEM_t
-	 * messages **/
-	uint32 nr_sys = 7;
+    string exc_name = 5;
+    string recipe = 6;
+    RTLIB_ProgrammingLanguage lang = 7;
+    uint32 count = 8;
+    RTLIB_Constraint constraints = 9;
+    sint32 gap = 10;
+    sint32 cusage = 11;
+    sint32 ctime_ms = 12;
+    uint32 event = 13;
+    sint32 awm = 14;
+    uint64 cpu_ids = 15;
+    uint64 cpu_ids_isolation = 16;
+    uint64 mem_ids = 17;
+    repeated rpc_msg_BBQ_SYNCP_PRECHANGE_SYSTEM systems = 18;
+    uint32 timeout = 19;
+    bool is_ocl = 20;
 }
 
 
 message rpc_msg_BBQ_SYNCP_PRECHANGE_SYSTEM {
-	/** The system number */
-	sint32 sys_id = 1;
-	/** Number of CPU (processors) assigned */
-	sint32 nr_cpus = 2;
-	/** Number of processing elements assigned */
-	sint32 nr_procs = 3;
-	/** Amount of processing quota assigned */
-	sint32 r_proc = 4;
-	/** Amount of memory assigned */
-	sint32 r_mem = 5;
+    /** The system number */
+    sint32 sys_id = 1;
+    /** Number of CPU (processors) assigned */
+    sint32 nr_cpus = 2;
+    /** Number of processing elements assigned */
+    sint32 nr_procs = 3;
+    /** Amount of processing quota assigned */
+    sint32 r_proc = 4;
+    /** Amount of memory assigned */
+    sint32 r_mem = 5;
     /** CONFIG_BBQUE_OPENCL */
-	sint32 r_gpu = 6;
-	sint32 r_acc = 7;
-	/** Assigned OpenCL device */
-	sint32 dev = 8;
-}
-
-
-/**
- * @brief Synchronization Protocol PreChange response
- */
-message rpc_msg_BBQ_SYNCP_PRECHANGE_RESP {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-	/** An estimation of the Synchronization Latency */
-	uint32 syncLatency = 2;
-	/** The RTLIB command exit code */
-	uint32 result = 3;
-}
-
-
-//----- SyncChange
-
-/**
- * @brief Synchronization Protocol SyncChange command
- */
-message rpc_msg_BBQ_SYNCP_SYNCCHANGE {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-}
-
-
-/**
- * @brief Synchronization Protocol SyncChange response
- */
-message rpc_msg_BBQ_SYNCP_SYNCCHANGE_RESP {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-	/** The RTLIB command exit code */
-	uint32 result = 2;
-}
-
-
-//----- DoChange
-
-/**
- * @brief Synchronization Protocol DoChange command
- */
-message rpc_msg_BBQ_SYNCP_DOCHANGE {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-}
-
-
-//----- PostChange
-
-/**
- * @brief Synchronization Protocol PostChange command
- */
-message rpc_msg_BBQ_SYNCP_POSTCHANGE {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-}
-
-
-/**
- * @brief Synchronization Protocol PostChange response
- */
-message rpc_msg_BBQ_SYNCP_POSTCHANGE_RESP {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-	/** The RTLIB command exit code */
-	uint32 result = 2;
-}
-
-
-/******************************************************************************
- * Barbeque Commands
- ******************************************************************************/
-
-/**
- * @brief Command to STOP an application execution context.
- */
-message rpc_msg_BBQ_STOP {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-	/** The Timeout for stopping the application */
-	//struct timespec timeout;   // TODO: do I have to encode the whole struct?
-    uint32 timeout = 2;
-}
-
-/**
- * @brief Command to STOP an application execution context.
- */
-message rpc_msg_BBQ_GET_PROFILE {
-	/** The RPC fifo command header */
-	rpc_msg_header hdr = 1;
-	/** OpenCL EXC flag */
-	bool is_ocl = 2;
+    sint32 r_gpu = 6;
+    sint32 r_acc = 7;
+    /** Assigned OpenCL device */
+    sint32 dev = 8;
 }

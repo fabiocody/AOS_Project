@@ -1,4 +1,4 @@
-// consumer.cc
+// fifo_consumer.cc
 
 #include "test_msg.pb.h"
 #include "fifo.h"
@@ -10,8 +10,7 @@ using namespace std;
 
 int main() {
     string fifoname = "/tmp/testfifo";
-    const char *c_fifoname = fifoname.c_str();
-    Fifo<TestMessage> fifo(c_fifoname);
+    Fifo<TestMessage> fifo(fifoname);
     shared_ptr<TestMessage> msg;
     do {
         msg = fifo.recv_msg();
