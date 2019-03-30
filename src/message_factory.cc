@@ -16,13 +16,6 @@ std::shared_ptr<rpc_msg> MessageFactory::generic_exc_msg(rpc_msg_type typ, uint3
     return msg;
 }
 
-std::shared_ptr<rpc_msg_resp> MessageFactory::generic_response(rpc_msg_type typ, uint32_t token) {
-    std::shared_ptr<rpc_msg_resp> resp = std::make_shared<rpc_msg_resp>();
-    resp->mutable_hdr()->set_typ(typ);
-    resp->mutable_hdr()->set_token(token);
-    return resp;
-}
-
 std::shared_ptr<rpc_msg> MessageFactory::app_pair(uint32_t token, uint32_t mjr_version, uint32_t mnr_version, std::string app_name) {
     std::shared_ptr<rpc_msg> msg = generic_msg(RPC_APP_PAIR, token);
     msg->set_mjr_version(mjr_version);
@@ -50,11 +43,16 @@ std::shared_ptr<rpc_msg> MessageFactory::exc_unregister(uint32_t token, uint32_t
     return msg;
 }
 
-std::shared_ptr<rpc_msg> MessageFactory::exc_set(uint32_t token, uint32_t exc_id, uint32_t count, RTLIB_Constraint *constraints) {
+std::shared_ptr<rpc_msg> MessageFactory::exc_set(uint32_t token, uint32_t exc_id) {
     std::shared_ptr<rpc_msg> msg = generic_exc_msg(RPC_EXC_SET, token, exc_id);
-    msg->set_count(count);
-    msg->set_allocated_constraints(constraints);
     return msg;
+}
+
+void MessageFactory::exc_set_add_constraint(std::shared_ptr<rpc_msg> msg, uint32_t awm, RTLIB_ConstraintOperation op, RTLIB_ConstraintType type) {
+    RTLIB_Constraint *constraint = msg->add_constraints();
+    constraint->set_awm(awm);
+    constraint->set_operation(op);
+    constraint->set_type(type);
 }
 
 std::shared_ptr<rpc_msg> MessageFactory::exc_clear(uint32_t token, uint32_t exc_id) {
@@ -107,8 +105,8 @@ void MessageFactory::bbq_syncp_prechange_system(std::shared_ptr<rpc_msg> msg, in
     system->set_dev(dev);
 }
 
-std::shared_ptr<rpc_msg_resp> MessageFactory::bbq_syncp_prechange_resp(uint32_t token, uint32_t synclatency, uint32_t result) {
-    std::shared_ptr<rpc_msg_resp> resp = generic_response(RPC_BBQ_RESP, token);
+std::shared_ptr<rpc_msg> MessageFactory::bbq_syncp_prechange_resp(uint32_t token, uint32_t synclatency, uint32_t result) {
+    std::shared_ptr<rpc_msg> resp = generic_msg(RPC_BBQ_RESP, token);
     resp->set_synclatency(synclatency);
     resp->set_result(result);
     return resp;
@@ -119,8 +117,8 @@ std::shared_ptr<rpc_msg> MessageFactory::bbq_syncp_syncchange(uint32_t token) {
     return msg;
 }
 
-std::shared_ptr<rpc_msg_resp> MessageFactory::bbq_syncp_syncchange_resp(uint32_t token, uint32_t result) {
-    std::shared_ptr<rpc_msg_resp> resp = generic_response(RPC_BBQ_RESP, token);
+std::shared_ptr<rpc_msg> MessageFactory::bbq_syncp_syncchange_resp(uint32_t token, uint32_t result) {
+    std::shared_ptr<rpc_msg> resp = generic_msg(RPC_BBQ_RESP, token);
     resp->set_result(result);
     return resp;
 }
@@ -135,8 +133,8 @@ std::shared_ptr<rpc_msg> MessageFactory::bbq_syncp_postchange(uint32_t token) {
     return msg;
 }
 
-std::shared_ptr<rpc_msg_resp> MessageFactory::bbq_syncp_postchange_resp(uint32_t token, uint32_t result) {
-    std::shared_ptr<rpc_msg_resp> resp = generic_response(RPC_BBQ_RESP, token);
+std::shared_ptr<rpc_msg> MessageFactory::bbq_syncp_postchange_resp(uint32_t token, uint32_t result) {
+    std::shared_ptr<rpc_msg> resp = generic_msg(RPC_BBQ_RESP, token);
     resp->set_result(result);
     return resp;
 }

@@ -126,40 +126,28 @@ message rpc_msg_header {
 }
 
 
-/**
- * @brief The response to a command
- */
-message rpc_msg_resp {
-    /** The RPC fifo command header */
-    rpc_msg_header hdr = 1;
-    /** The RTLIB command exit code */
-    uint32 result = 2;
-    /** An estimation of the Synchronization Latency */
-    uint32 syncLatency = 3;
-}
-
-
 message rpc_msg {
     rpc_msg_header hdr = 1;
-    uint32 mjr_version = 2;
-    uint32 mnr_version = 3;
-    string app_name = 4;
-    string exc_name = 5;
-    string recipe = 6;
-    RTLIB_ProgrammingLanguage lang = 7;
-    uint32 count = 8;
-    RTLIB_Constraint constraints = 9;
-    sint32 gap = 10;
-    sint32 cusage = 11;
-    sint32 ctime_ms = 12;
-    uint32 event = 13;
-    sint32 awm = 14;
-    uint64 cpu_ids = 15;
-    uint64 cpu_ids_isolation = 16;
-    uint64 mem_ids = 17;
-    repeated rpc_msg_BBQ_SYNCP_PRECHANGE_SYSTEM systems = 18;
-    uint32 timeout = 19;
-    bool is_ocl = 20;
+    uint32 result = 2;
+    uint32 syncLatency = 3;
+    uint32 mjr_version = 4;
+    uint32 mnr_version = 5;
+    string app_name = 6;
+    string exc_name = 7;
+    string recipe = 8;
+    RTLIB_ProgrammingLanguage lang = 9;
+    repeated RTLIB_Constraint constraints = 10;
+    sint32 gap = 11;
+    sint32 cusage = 12;
+    sint32 ctime_ms = 13;
+    uint32 event = 14;
+    sint32 awm = 15;
+    uint64 cpu_ids = 16;
+    uint64 cpu_ids_isolation = 17;
+    uint64 mem_ids = 18;
+    repeated rpc_msg_BBQ_SYNCP_PRECHANGE_SYSTEM systems = 19;
+    uint32 timeout = 20;
+    bool is_ocl = 21;
 }
 
 

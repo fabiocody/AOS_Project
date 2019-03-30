@@ -19,20 +19,13 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${INCLUDE_DIR})
 include_directories(${BARBEQUE_INCLUDE})
 
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_DIR}/rpc_messages.proto ${PROTO_DIR}/test_msg.proto )
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_DIR}/rpc_messages.proto)
 set(PROTO_FILES ${PROTO_HDRS} ${PROTO_SRCS})
 
 file(GLOB SOURCES "${SOURCE_DIR}/*.cc")
 
 add_executable(test ${TESTS_DIR}/test.cc ${SOURCES} ${PROTO_FILES})
 target_link_libraries(test ${PROTOBUF_LIBRARY})
-
-
-add_executable(producer ${TESTS_DIR}/fifo_producer.cc ${SOURCES} ${PROTO_FILES})
-target_link_libraries(producer ${PROTOBUF_LIBRARY})
-
-add_executable(consumer ${TESTS_DIR}/fifo_consumer.cc ${SOURCES} ${PROTO_FILES})
-target_link_libraries(consumer ${PROTOBUF_LIBRARY})
 
 add_executable(barbeque ${TESTS_DIR}/barbeque.cc ${SOURCES} ${PROTO_FILES})
 target_link_libraries(barbeque ${PROTOBUF_LIBRARY})
