@@ -36,6 +36,8 @@ int main(int argc, char *argv[]) {
             msg = MessageFactory::bbq_stop(urand(), urand());
         } else if (input == "bbq_get_profile") {
             msg = MessageFactory::bbq_get_profile(urand(), false);
+        } else if (input == "exit") {
+            msg = nullptr;
         } else {
             cout << "Invalid message" << endl;
             msg = nullptr;

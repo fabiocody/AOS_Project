@@ -45,6 +45,8 @@ int main(int argc, char *argv[]) {
             msg = MessageFactory::exc_stop(urand(), urand());
         } else if (input == "exc_schedule") {
             msg = MessageFactory::exc_schedule(urand(), urand());
+        } else if (input == "exit") {
+            msg = nullptr;
         } else {
             cout << "Invalid message" << endl;
             msg = nullptr;
