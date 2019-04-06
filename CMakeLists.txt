@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.11)
 project(AOS_Project)
 
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+find_package(Threads REQUIRED)
+
 find_package(Protobuf REQUIRED)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -25,10 +29,10 @@ set(PROTO_FILES ${PROTO_HDRS} ${PROTO_SRCS})
 file(GLOB SOURCES "${SOURCE_DIR}/*.cc")
 
 add_executable(test ${TESTS_DIR}/test.cc ${SOURCES} ${PROTO_FILES})
-target_link_libraries(test ${PROTOBUF_LIBRARY})
+target_link_libraries(test ${PROTOBUF_LIBRARY} Threads::Threads)
 
 add_executable(barbeque ${TESTS_DIR}/barbeque.cc ${SOURCES} ${PROTO_FILES})
-target_link_libraries(barbeque ${PROTOBUF_LIBRARY})
+target_link_libraries(barbeque ${PROTOBUF_LIBRARY} Threads::Threads)
 
 add_executable(application ${TESTS_DIR}/application.cc ${SOURCES} ${PROTO_FILES})
-target_link_libraries(application ${PROTOBUF_LIBRARY})
+target_link_libraries(application ${PROTOBUF_LIBRARY} Threads::Threads)
