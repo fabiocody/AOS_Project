@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.11)
 project(AOS_Project)
 
 find_package(Protobuf REQUIRED)

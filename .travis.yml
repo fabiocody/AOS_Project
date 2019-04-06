@@ -1,9 +1,12 @@
 language: cpp
-
+dist: xenial
 sudo: true
-addons:
-  apt:
-    packages:
-      - protobuf-compilier
 
-script: mkdir build && cd build && cmake .. && make
+env:
+    - PROTOBUF_DIR=$HOME/.protobuf PATH=$PATH:$PROTOBUF_DIR/bin
+
+cache:
+    directories:
+        - $HOME/.protobuf
+
+script: ./.install-protobuf-travis.sh && mkdir -p build && cd build && cmake -D Protobuf_INCLUDE_DIR=$PROTOBUF_DIR/include -D PROTOBUF_LIBRARY=$PROTOBUF_DIR/lib/libprotobuf.so .. && make
