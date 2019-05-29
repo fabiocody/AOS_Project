@@ -194,7 +194,7 @@ int32_t WorkingMode::BindResource(
 	// Check that the source map contains all the requests. This check is
 	// necessary since a policy may have added further requests after
 	// performing some bindings
-	if (out_map->size() != resources.requested.size()) {
+	if (!out_map->empty() && (out_map->size() != resources.requested.size())) {
 		uint32_t miss_count = AddMissingResourceRequests(out_map, r_type);
 		logger->Debug("BindResource: added %d missing request(s)", miss_count);
 	}
@@ -236,7 +236,7 @@ int32_t WorkingMode::BindResource(
 	// Check that the source map contains all the requests. This check is
 	// necessary since a policy may have added further requests after
 	// performing some bindings
-	if (out_map->size() != resources.requested.size()) {
+	if (!out_map->empty() && (out_map->size() != resources.requested.size())) {
 		uint32_t miss_count = AddMissingResourceRequests(out_map, resource_path->Type());
 		logger->Debug("BindResource: added %d missing request(s)", miss_count);
 	}
@@ -344,12 +344,12 @@ int32_t WorkingMode::StoreBinding(
 	if (prev_refn < 0) {
 		refn = 0;
 		resources.sched_bindings.push_back(out_map);
-		logger->Debug("StoreBinding: first binding stored");
+		logger->Debug("StoreBinding: first binding stored [refn=%d]", refn);
 	}
 	else if (prev_refn < (int32_t) resources.sched_bindings.size()) {
 		refn = prev_refn;
 		resources.sched_bindings[refn] = out_map;
-		logger->Debug("StoreBinding: updated binding stored");
+		logger->Debug("StoreBinding: updated binding stored [refn=%d]", refn);
 	}
 	else
 		logger->Error("StoreBinding: out of range reference number [%d]",
