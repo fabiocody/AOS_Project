@@ -245,7 +245,7 @@ public:
 	 *
 	 * @return The related @ref ResourceType value
 	 **/
-	inline ResourceType Type(ssize_t rel_pos=0) {
+	inline ResourceType Type(ssize_t rel_pos) {
 		ssize_t pos = rel_pos;
 		if (pos < 0)
 			pos += identifiers.size() - 1;

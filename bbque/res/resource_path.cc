@@ -188,6 +188,8 @@ ResourcePath::ExitCode_t ResourcePath::Append(
 	auto curr_resource_ident = std::make_shared<ResourceIdentifier>(r_type, r_id);
 	identifiers.push_back(curr_resource_ident);
 	global_type = r_type;
+	logger->Debug("Append: updating global type = <%s>",
+		br::GetResourceTypeString(global_type));
 
 	// Increase the levels counter
 	++level_count;
