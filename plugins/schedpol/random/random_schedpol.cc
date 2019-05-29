@@ -45,27 +45,7 @@ RandomSchedPol::RandomSchedPol() :
 	// Get a logger
 	logger = bu::Logger::GetLogger(MODULE_NAMESPACE);
 	assert(logger);
-
 	logger->Debug("Built RANDOM SchedPol object @%p", (void*)this);
-
-	// Resource binding domain information
-	po::options_description opts_desc("Scheduling policy parameters");
-	// Binding domain resource path
-	opts_desc.add_options()
-		(SCHEDULER_POLICY_CONFIG".binding.domain",
-		 po::value<std::string>
-		 (&binding_domain)->default_value(SCHEDULER_DEFAULT_BINDING_DOMAIN),
-		"Resource binding domain");
-	;
-	po::variables_map opts_vm;
-	cm.ParseConfigurationFile(opts_desc, opts_vm);
-
-	// Binding domain resource type
-	br::ResourcePath rp(binding_domain);
-	binding_type = rp.Type();
-	logger->Debug("Binding domain:'%s' Type:%s",
-			binding_domain.c_str(),
-			br::GetResourceTypeString(binding_type));
 }
 
 RandomSchedPol::~RandomSchedPol() {
@@ -80,7 +60,7 @@ char const * RandomSchedPol::Name() {
 void RandomSchedPol::ScheduleApp(ba::AppCPtr_t papp) {
 	ba::AwmPtr_t selected_awm;
 	int8_t selected_awm_id;
-	uint32_t selected_bd;
+	uint32_t selected_cpu_id;
 	uint8_t bd_count;
 	int32_t b_refn;
 	std::default_random_engine generator;
@@ -89,15 +69,23 @@ void RandomSchedPol::ScheduleApp(ba::AppCPtr_t papp) {
 
 	// Check for a valid binding domain count
 	BindingMap_t & bindings(bdm.GetBindingDomains());
-	bd_count = bindings[br::ResourceType::CPU]->resources.size();
+	auto cpu_it = bindings.find(br::ResourceType::CPU);
+	if (cpu_it == bindings.end()) {
+		logger->Warn("ScheduleApp: no CPU bindings (?)");
+		return;
+	}
+
+	auto & cpu_binding = cpu_it->second;
+	bd_count = cpu_binding->resources.size();
 	logger->Debug("CPU binding domains : %d", bd_count);
 	if (bd_count == 0) {
+		logger->Warn("ScheduleApp: CPU bindings not available (?)");
 		assert(bd_count != 0);
 		return;
 	}
 
 	ba::AwmPtrList_t const & awms(papp->WorkingModes());
-	logger->Debug("Application working modes : %d", awms.size());
+	logger->Debug("ScheduleApp: application working modes: %d", awms.size());
 	std::uniform_int_distribution<int> awm_dist(0, awms.size()-1);
 	std::uniform_int_distribution<int> bd_dist(0, bd_count);
 	bool binding_done = false;
@@ -106,38 +94,46 @@ void RandomSchedPol::ScheduleApp(ba::AppCPtr_t papp) {
 	while (!binding_done) {
 		// Select a random AWM for this EXC
 		selected_awm_id = awm_dist(generator);
-		logger->Debug("Scheduling EXC [%s] on AWM [%d of %d]",
+		logger->Debug("ScheduleApp: EXC [%s] on AWM [%d of %d]",
 				papp->StrId(), selected_awm_id, awms.size());
-		for (auto & pawm: awms)
+		for (auto & pawm: awms) {
 			if (pawm->Id() == selected_awm_id)
 				selected_awm = pawm;
+		}
 		assert(selected_awm != nullptr);
 
 		// Bind to a random virtual binding domain
-		selected_bd = bd_dist(generator);
-		logger->Debug("Scheduling EXC [%s] on binding domain <%d of %d>",
-				papp->StrId(), selected_bd, bd_count);
-		b_refn = selected_awm->BindResource(binding_type, R_ID_ANY, selected_bd);
+		selected_cpu_id = bd_dist(generator);
+		logger->Debug("ScheduleApp: EXC [%s] on binding domain (CPU) <%d of %d>",
+			papp->StrId(), selected_cpu_id, bd_count);
 
-		// Scheduling attempt (if binding successful)
-		if (b_refn < 0) {
+		// Binding to (CPU) id
+		b_refn = selected_awm->BindResource(
+				br::ResourceType::CPU, R_ID_ANY, selected_cpu_id);
+		if (b_refn >= 0) {
+			// Schedule request
 			ApplicationManager & am(ApplicationManager::GetInstance());
 			auto ret = am.ScheduleRequest(papp, selected_awm, ra_view, b_refn);
 			if (ret == ApplicationManager::AM_SUCCESS) {
-				logger->Info("Scheduling EXC [%s] on binding domain <%d> done.",
-						papp->StrId(), selected_bd);
-				binding_done = true;
-				continue;
+				logger->Info("ScheduleApp: EXC [%s] on binding domain <%d> done.",
+					papp->StrId(), selected_cpu_id);
+				return;
+			}
+			else {
+				logger->Error("ScheduleApp: EXC [%s] AWM=<%d> CPU=<%d> not schedulable",
+					papp->StrId(), selected_awm_id, selected_cpu_id);
 			}
 		} else {
-			logger->Warn("Resource binding for EXC [%s] on <%d> FAILED "
-					"(attempt %d of %d)",
-					papp->StrId(), selected_bd, nr_attempts, NR_ATTEMPTS_MAX);
+			logger->Warn("ScheduleApp: EXC [%s] resource binding to CPU<%d> FAILED ",
+				papp->StrId(), selected_cpu_id);
+		}
 
 		// Check if we still have attempts
+		logger->Info("ScheduleApp: EXC [%s] scheduling attempt %d out of %d",
+			papp->StrId(), nr_attempts, NR_ATTEMPTS_MAX);
+
 		if (++nr_attempts >= NR_ATTEMPTS_MAX)
-			return;
-		}
+			binding_done = true;
 	}
 }
 
@@ -154,13 +150,14 @@ RandomSchedPol::Init() {
 	snprintf(token_path, 32, "%s%d", MODULE_NAMESPACE, ra_view_count);
 
 	// Get a resource state view
-	logger->Debug("Init: Requiring state view token for %s", token_path);
+	logger->Debug("Init: requiring state view token for %s", token_path);
 	result = ra.GetView(token_path, ra_view);
 	if (result != ResourceAccounterStatusIF::RA_SUCCESS) {
 		logger->Fatal("Init: Cannot get a resource state view");
 		return SCHED_ERROR;
 	}
-	logger->Debug("Init: Resources state view token = %d", ra_view);
+	logger->Debug("Init: resources state view token = %d", ra_view);
+	logger->Warn("Init: random policy allocates CPUs only!");
 
 	return SCHED_DONE;
 }
@@ -182,7 +179,6 @@ RandomSchedPol::Schedule(bbque::System & sv, br::RViewToken_t &rav) {
 		return result;
 
 	logger->Info("Random scheduling RUNNING applications...");
-
 	papp = sv.GetFirstRunning(app_it);
 	while (papp) {
 		ScheduleApp(papp);
@@ -190,7 +186,6 @@ RandomSchedPol::Schedule(bbque::System & sv, br::RViewToken_t &rav) {
 	}
 
 	logger->Info("Random scheduling READY applications...");
-
 	papp = sv.GetFirstReady(app_it);
 	while (papp) {
 		ScheduleApp(papp);
