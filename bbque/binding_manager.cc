@@ -43,19 +43,20 @@ void BindingManager::InitBindingDomains() {
 	// Binding domain resource path
 	ConfigurationManager & config_manager(ConfigurationManager::GetInstance());
 	std::string domains_str;
-	boost::program_options::options_description opts_desc("BindingManager options (domains)");
+	boost::program_options::options_description opts_desc(
+		"BindingManager options (domains)");
 	opts_desc.add_options()
 		(MODULE_CONFIG ".domains",
 		 boost::program_options::value<std::string>(&domains_str)->default_value("cpu"),
 		"Resource binding domain");
 	boost::program_options::variables_map opts_vm;
 	config_manager.ParseConfigurationFile(opts_desc, opts_vm);
-	logger->Info("Binding domains: %s", domains_str.c_str());
+	logger->Info("Bindings: domains string = %s", domains_str.c_str());
+	logger->Info("Bindings: prefix path = <%s>", ra.GetPrefixPath().ToString().c_str());
 
 	// Parse each binding domain string
 	size_t end_pos = 0;
 	std::string binding_str;
-	br::ResourceType type;
 	while (end_pos != std::string::npos) {
 		end_pos     = domains_str.find(',');
 		binding_str = domains_str.substr(0, end_pos);
@@ -67,16 +68,21 @@ void BindingManager::InitBindingDomains() {
 		base_path->Concat(binding_str);
 
 		// Binding domain resource type check
-		type = base_path->Type();
+		br::ResourceType type = base_path->Type();
 		if (type == br::ResourceType::UNDEFINED) {
-			logger->Error("Binding: Invalid domain type <%s>",
+			logger->Error("Bindings: invalid domain type <%s>",
 					binding_str.c_str());
 			continue;
+		}
+		else {
+			logger->Debug("Bindings: base_path=<%s> [type=%s]",
+				base_path->ToString().c_str(),
+				br::GetResourceTypeString(type));
 		}
 
 #ifndef CONFIG_BBQUE_OPENCL
 		if (type == br::ResourceType::GPU) {
-			logger->Info("Binding: OpenCL support disabled."
+			logger->Info("Bindings: OpenCL support disabled."
 					" Discarding <GPU> binding type");
 			continue;
 		}
@@ -84,9 +90,9 @@ void BindingManager::InitBindingDomains() {
 		// New binding info structure
 		domains.emplace(type, std::make_shared<BindingInfo_t>());
 		domains[type]->base_path = base_path;
-		logger->Info("Resource binding domain: '%s' Type:<%s>",
-				domains[type]->base_path->ToString().c_str(),
-				br::GetResourceTypeString(type));
+		logger->Info("Bindings: domain='%s' -> type=<%s>",
+			domains[type]->base_path->ToString().c_str(),
+			br::GetResourceTypeString(type));
 	}
 }
 
