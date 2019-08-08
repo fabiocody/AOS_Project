@@ -14,7 +14,7 @@ int main() {
     for (unsigned int i = 0; i < 100; i++)
         cout << "Random number: " << rand() << endl;
     cout << endl;
-    shared_ptr<rpc_msg> msg = MessageFactory::bbq_stop(42, 100);
+    shared_ptr<rpc_msg> msg = MessageFactory::bbq_stop(42, 42, 42, 100);
     cout << msg->DebugString() << endl;
     return 0;
 }

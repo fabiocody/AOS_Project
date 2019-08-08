@@ -25,17 +25,17 @@ int main(int argc, char *argv[]) {
         // cout << ">>> ";
         getline(cin, input);
         if (input == "bbq_syncp_postchange") {
-            msg = MessageFactory::bbq_syncp_postchange(urand());
+            msg = MessageFactory::bbq_syncp_postchange(urand(), urand(), urand());
         } else if (input == "bbq_syncp_dochange") {
-            msg = MessageFactory::bbq_syncp_dochange(urand());
+            msg = MessageFactory::bbq_syncp_dochange(urand(), urand(), urand());
         } else if (input == "bbq_syncp_syncchange") {
-            msg = MessageFactory::bbq_syncp_syncchange(urand());
+            msg = MessageFactory::bbq_syncp_syncchange(urand(), urand(), urand());
         } else if (input == "bbq_syncp_prechange") {
-            msg = MessageFactory::bbq_syncp_prechange(urand(), urand(), rand(), urand(), urand(), urand());
+            msg = MessageFactory::bbq_syncp_prechange(urand(), urand(), urand(), urand(), rand(), urand(), urand(), urand());
         } else if (input == "bbq_stop_execution") {
-            msg = MessageFactory::bbq_stop(urand(), urand());
+            msg = MessageFactory::bbq_stop(urand(), urand(), urand(), urand());
         } else if (input == "bbq_get_profile") {
-            msg = MessageFactory::bbq_get_profile(urand(), false);
+            msg = MessageFactory::bbq_get_profile(urand(), urand(), urand(), false);
         } else if (input == "exit") {
             msg = nullptr;
         } else {

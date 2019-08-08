@@ -25,26 +25,26 @@ int main(int argc, char *argv[]) {
         // cout << ">>> ";
         getline(cin, input);
         if (input == "app_pair") {
-            msg = MessageFactory::app_pair(urand(), urand(), urand(), "Hello, world!");
+            msg = MessageFactory::app_pair(urand(), urand(), urand(), urand(), urand(), "Hello, world!");
         } else if (input == "app_exit") {
-            msg = MessageFactory::app_exit(urand());
+            msg = MessageFactory::app_exit(urand(), urand(), urand());
         } else if (input == "exc_register") {
-            msg = MessageFactory::exc_register(urand(), urand(), "Hello, world!", "Hello, world!", 2);
+            msg = MessageFactory::exc_register(urand(), urand(), urand(), "Hello, world!", "Hello, world!", 2);
         } else if (input == "exc_unregister") {
-            msg = MessageFactory::exc_unregister(urand(), urand(), "Hello, world!");
+            msg = MessageFactory::exc_unregister(urand(), urand(), urand(), "Hello, world!");
         } else if (input == "exc_set") {
-            msg = MessageFactory::exc_set(urand(), urand());
+            msg = MessageFactory::exc_set(urand(), urand(), urand());
             MessageFactory::exc_set_add_constraint(msg, urand(), 1, 0);
         } else if (input == "exc_clear") {
-            msg = MessageFactory::exc_clear(urand(), urand());
+            msg = MessageFactory::exc_clear(urand(), urand(), urand());
         } else if (input == "exc_rtnotify") {
-            msg = MessageFactory::exc_rtnotify(urand(), urand(), rand(), rand(), rand());
+            msg = MessageFactory::exc_rtnotify(urand(), urand(), urand(), rand(), rand(), rand());
         } else if (input == "exc_start") {
-            msg = MessageFactory::exc_start(urand(), urand());
+            msg = MessageFactory::exc_start(urand(), urand(), urand());
         } else if (input == "exc_stop") {
-            msg = MessageFactory::exc_stop(urand(), urand());
+            msg = MessageFactory::exc_stop(urand(), urand(), urand());
         } else if (input == "exc_schedule") {
-            msg = MessageFactory::exc_schedule(urand(), urand());
+            msg = MessageFactory::exc_schedule(urand(), urand(), urand());
         } else if (input == "exit") {
             msg = nullptr;
         } else {
