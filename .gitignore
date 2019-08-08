@@ -302,3 +302,14 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/c++,clion,macos,linux,cmake,windows,clion+iml,clion+all
 
+### VisualStudioCode ###
+.vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
