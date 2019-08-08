@@ -1,94 +1,6 @@
 syntax = "proto3";
 
 
-/**
- * @brief The RPC message identifier
- *
- * The value of the message identifier is used to give priority to messages.
- * The higer the message id the higer the message priority.
- */
-enum rpc_msg_type {
-    //--- Application Originated Messages
-    RPC_APP_PAIR = 0;
-    RPC_APP_EXIT = 1;
-
-    RPC_APP_RESP = 2;          ///< Response to an APP request
-    RPC_APP_MSGS_COUNT = 3;    ///< The number of APP originated messages
-
-    //--- Execution Context Originated Messages
-    RPC_EXC_SCHEDULE = 4;
-    RPC_EXC_START = 5;
-    RPC_EXC_SET = 6;
-    RPC_EXC_CLEAR = 7;
-    RPC_EXC_STOP = 8;
-    RPC_EXC_REGISTER = 9;
-    RPC_EXC_RTNOTIFY = 10;
-    RPC_EXC_UNREGISTER = 11;
-
-    RPC_EXC_RESP = 12;          ///< Response to an EXC request
-    RPC_EXC_MSGS_COUNT = 13;    ///< The number of EXC originated messages
-
-
-    //--- Barbeque Originated Messages
-    RPC_BBQ_SYNCP_POSTCHANGE = 14;
-    RPC_BBQ_SYNCP_DOCHANGE = 15;
-    RPC_BBQ_SYNCP_SYNCCHANGE = 16;
-    RPC_BBQ_SYNCP_PRECHANGE = 17;
-
-    RPC_BBQ_STOP_EXECUTION = 18;
-    RPC_BBQ_GET_PROFILE = 19;
-
-    RPC_BBQ_RESP = 20;         ///< Response to a BBQ command
-    RPC_BBQ_MSGS_COUNT = 21;   ///< The number of EXC originated messages
-}
-
-
-/**
- * @brief The Execution Context (EXC) programming language.
- * @ingroup rtlib_sec03_plain_services
- */
-enum RTLIB_ProgrammingLanguage {
-    /** Undefined application language */
-    RTLIB_LANG_UNDEF = 0;
-    /** C coded EXC */
-    RTLIB_LANG_C = 1;
-    /** CPP coded EXC */
-    RTLIB_LANG_CPP = 2;
-    /** OpenCL coded EXC */
-    RTLIB_LANG_OPENCL = 3;
-    RTLIB_LANG_COUNT = 4;
-}
-
-
-/**
- * @brief The operation requested on a resource constraint.
- * @ingroup rtlib_sec03_plain_constr
- */
-enum RTLIB_ConstraintOperation {
-    /** Remove the specified constraint */
-    CONSTRAINT_REMOVE = 0;
-    /** Add the specified constraint */
-    CONSTRAINT_ADD = 1;
-}
-
-
-/**
- * @brief The possible boundary asserted by a resource constraint.
- * @ingroup rtlib_sec03_plain_constr
- *
- * The EXC can constrain its resource allocation, i.e. it can tell the
- * BarbequeRTRM not to take into account some of the AWMs contained in the
- * recipe.
- */
-enum RTLIB_ConstraintType {
-    /** Targets AWMs lower or equal to the specified one */
-    LOWER_BOUND = 0;
-    /** Targets AWMs higher or equal to the specified one */
-    UPPER_BOUND = 1;
-    /** Targets the specified AWM */
-    EXACT_VALUE = 2;
-}
-
 
 /**
  * @brief A constraint asserted on recipe specified working modes
@@ -98,14 +10,15 @@ enum RTLIB_ConstraintType {
  * certain amount of resources usage.  Applications could assert some
  * constraints at run-time, to invalidate a subset of its own working modes.
  */
-message RTLIB_Constraint {
+message Constraint {
     /** The identified of an Application Working Mode (AWM) */
     uint32 awm = 1;
     /** The required operation on the previous AWM */
-    RTLIB_ConstraintOperation operation = 2;
+    uint32 operation = 2;
     /** The constraint boundary */
-    RTLIB_ConstraintType type = 3;
+    uint32 type = 3;
 };
+
 
 
 /**
@@ -113,7 +26,7 @@ message RTLIB_Constraint {
  */
 message rpc_msg_header {
     /** The command to execute (defines the message "payload" type) */
-    rpc_msg_type typ = 1;
+    uint32 typ = 1;
     /** A token used by the message sender to match responses */
     uint32 token = 2;
     // FIXME These is maybe superfluous... it is required just for the pairing
@@ -135,8 +48,8 @@ message rpc_msg {
     string app_name = 6;
     string exc_name = 7;
     string recipe = 8;
-    RTLIB_ProgrammingLanguage lang = 9;
-    repeated RTLIB_Constraint constraints = 10;
+    uint32 lang = 9;
+    repeated Constraint constraints = 10;
     sint32 gap = 11;
     sint32 cusage = 12;
     sint32 ctime_ms = 13;

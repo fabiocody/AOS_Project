@@ -7,7 +7,7 @@
 
 void ResponseFactory::resp(std::shared_ptr<rpc_msg> msg, Fifo & fifo) {
     std::shared_ptr<rpc_msg> resp;
-    rpc_msg_type type = msg->hdr().typ();
+    uint32_t type = msg->hdr().typ();
     if (type >= RPC_APP_PAIR && type <= RPC_APP_EXIT)
         resp = app_resp(msg);
     else if (type >= RPC_EXC_SCHEDULE && type <= RPC_EXC_UNREGISTER)
@@ -35,7 +35,7 @@ std::shared_ptr<rpc_msg> ResponseFactory::exc_resp(std::shared_ptr<rpc_msg> msg)
 
 std::shared_ptr<rpc_msg> ResponseFactory::bbq_resp(std::shared_ptr<rpc_msg> msg) {
     std::shared_ptr<rpc_msg> resp;
-    rpc_msg_type type = msg->hdr().typ();
+    uint32_t type = msg->hdr().typ();
     uint32_t token = msg->hdr().token();
     std::function<unsigned int ()> urand = get_urand();
     if (type == RPC_BBQ_SYNCP_PRECHANGE) {

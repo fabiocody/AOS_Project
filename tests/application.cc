@@ -29,12 +29,12 @@ int main(int argc, char *argv[]) {
         } else if (input == "app_exit") {
             msg = MessageFactory::app_exit(urand());
         } else if (input == "exc_register") {
-            msg = MessageFactory::exc_register(urand(), urand(), "Hello, world!", "Hello, world!", RTLIB_LANG_CPP);
+            msg = MessageFactory::exc_register(urand(), urand(), "Hello, world!", "Hello, world!", 2);
         } else if (input == "exc_unregister") {
             msg = MessageFactory::exc_unregister(urand(), urand(), "Hello, world!");
         } else if (input == "exc_set") {
             msg = MessageFactory::exc_set(urand(), urand());
-            MessageFactory::exc_set_add_constraint(msg, urand(), CONSTRAINT_ADD, LOWER_BOUND);
+            MessageFactory::exc_set_add_constraint(msg, urand(), 1, 0);
         } else if (input == "exc_clear") {
             msg = MessageFactory::exc_clear(urand(), urand());
         } else if (input == "exc_rtnotify") {

@@ -11,16 +11,16 @@ class MessageFactory {
 
 public:
     /** Generic */
-    static std::shared_ptr<rpc_msg> generic_msg(rpc_msg_type typ, uint32_t token);
-    static std::shared_ptr<rpc_msg> generic_exc_msg(rpc_msg_type typ, uint32_t token, uint32_t exc_id);
+    static std::shared_ptr<rpc_msg> generic_msg(uint32_t typ, uint32_t token);
+    static std::shared_ptr<rpc_msg> generic_exc_msg(uint32_t typ, uint32_t token, uint32_t exc_id);
 
     /**  */
     static std::shared_ptr<rpc_msg> app_pair(uint32_t token, uint32_t mjr_version, uint32_t mnr_version, std::string app_name);
     static std::shared_ptr<rpc_msg> app_exit(uint32_t token);
-    static std::shared_ptr<rpc_msg> exc_register(uint32_t token, uint32_t exc_id, std::string exc_name, std::string recipe, RTLIB_ProgrammingLanguage lang);
+    static std::shared_ptr<rpc_msg> exc_register(uint32_t token, uint32_t exc_id, std::string exc_name, std::string recipe, uint32_t lang);
     static std::shared_ptr<rpc_msg> exc_unregister(uint32_t token, uint32_t exc_id, std::string exc_name);
     static std::shared_ptr<rpc_msg> exc_set(uint32_t token, uint32_t exc_id);
-    static void exc_set_add_constraint(std::shared_ptr<rpc_msg> msg, uint32_t awm, RTLIB_ConstraintOperation op, RTLIB_ConstraintType type);
+    static void exc_set_add_constraint(std::shared_ptr<rpc_msg> msg, uint32_t awm, uint32_t op, uint32_t type);
     static std::shared_ptr<rpc_msg> exc_clear(uint32_t token, uint32_t exc_id);
     static std::shared_ptr<rpc_msg> exc_rtnotify(uint32_t token, uint32_t exc_id, int32_t gap, int32_t cusage, int32_t ctime_ms);
     static std::shared_ptr<rpc_msg> exc_start(uint32_t token, uint32_t exc_id);

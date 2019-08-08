@@ -1,16 +1,17 @@
 // message_factory.cc
 
 #include "message_factory.h"
+#include "utils.h"
 
 
-std::shared_ptr<rpc_msg> MessageFactory::generic_msg(rpc_msg_type typ, uint32_t token) {
+std::shared_ptr<rpc_msg> MessageFactory::generic_msg(uint32_t typ, uint32_t token) {
     std::shared_ptr<rpc_msg> msg = std::make_shared<rpc_msg>();
     msg->mutable_hdr()->set_typ(typ);
     msg->mutable_hdr()->set_token(token);
     return msg;
 }
 
-std::shared_ptr<rpc_msg> MessageFactory::generic_exc_msg(rpc_msg_type typ, uint32_t token, uint32_t exc_id) {
+std::shared_ptr<rpc_msg> MessageFactory::generic_exc_msg(uint32_t typ, uint32_t token, uint32_t exc_id) {
     std::shared_ptr<rpc_msg> msg = generic_msg(typ, token);
     msg->mutable_hdr()->set_exc_id(exc_id);
     return msg;
@@ -29,7 +30,7 @@ std::shared_ptr<rpc_msg> MessageFactory::app_exit(uint32_t token) {
     return msg;
 }
 
-std::shared_ptr<rpc_msg> MessageFactory::exc_register(uint32_t token, uint32_t exc_id, std::string exc_name, std::string recipe, RTLIB_ProgrammingLanguage lang) {
+std::shared_ptr<rpc_msg> MessageFactory::exc_register(uint32_t token, uint32_t exc_id, std::string exc_name, std::string recipe, uint32_t lang) {
     std::shared_ptr<rpc_msg> msg = generic_exc_msg(RPC_EXC_REGISTER, token, exc_id);
     msg->set_exc_name(exc_name);
     msg->set_recipe(recipe);
@@ -48,8 +49,8 @@ std::shared_ptr<rpc_msg> MessageFactory::exc_set(uint32_t token, uint32_t exc_id
     return msg;
 }
 
-void MessageFactory::exc_set_add_constraint(std::shared_ptr<rpc_msg> msg, uint32_t awm, RTLIB_ConstraintOperation op, RTLIB_ConstraintType type) {
-    RTLIB_Constraint *constraint = msg->add_constraints();
+void MessageFactory::exc_set_add_constraint(std::shared_ptr<rpc_msg> msg, uint32_t awm, uint32_t op, uint32_t type) {
+    Constraint *constraint = msg->add_constraints();
     constraint->set_awm(awm);
     constraint->set_operation(op);
     constraint->set_type(type);
@@ -150,8 +151,3 @@ std::shared_ptr<rpc_msg> MessageFactory::bbq_get_profile(uint32_t token, bool is
     msg->set_is_ocl(is_ocl);
     return msg;
 }
-
-
-
-
-
