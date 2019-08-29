@@ -1,0 +1,74 @@
+\section{Introduction}
+
+% TODO
+
+\subsection{Problem statement}
+Refactoring of the BarbequeRTRM $\leftrightarrow$ RTLib communication infrastructure, basing it on \emph{Google Protocol Buffer}. Possibly, make a performance comparison with the current FIFO-based implementation.
+
+\subsection{Summary of the work}
+\begin{itemize}
+    \item Definition of a \texttt{proto} file holding all the \emph{Protocol Buffer} declarations.
+    \item Declaration of all the additional configuration options.
+    \item Refactorization of the pre-existing code and CMake files to accomodate such additional configuration.
+    \item Separation of the pre-existing implementation and the future one into separate directories.
+    \item Implementation of the RTLib side of the infrastructure.
+    \item Implementation of the Barbeque side of the infrastructure.
+\end{itemize}
+
+\pagebreak
+
+\section{Design and implementation}
+
+% TODO: FIFO preserved
+
+\subsection{Messages declaration}
+\label{sec:messages-declaration}
+
+The pre-existing code featured a series of native C-style \texttt{structs} used to represent each type of message together with some \texttt{enums} to limit the values of some fields. The adopted approach was to translate all the message type \texttt{structs} into a single protobuf \texttt{message}, in order to limit the number of types declared\footnote{Note that the type of the message is still clearly identifiable by one of the header fields.}. This was suggested also by the specific serialization technique of the adopted version 3 of the framework: scalar fields are only explicitly serialized if their value is different from the default one, so the unset fields are not actually transmitted. A separate \texttt{message} was used to translate the message header and the other message-specific \texttt{structs}, e.g.,  the constraints. The original C-style enums were left, and the corresponding fields were translated into simple 32-bits unsigned integers.
+
+Since some response types carry additional fields compared to the \emph{standard} response type, an additional \texttt{enum} field was added to the protobuf header in order to correctly translate these responses back and forth between \texttt{structs} and protobuf classes.
+
+\subsection{Implementation}
+
+In order to speedup implementation, a \emph{helper} class composed of only static member functions was used. This class was originally conceived to hold all the conversion code from struct to protobuf. This idea has later been dropped, because contrary to expectations it was generating a lot of repeated code. The only member functions left in the class were the ones related to the header translation, as the header is present in almost everything that is serialized and deserialized on and from the wire. The actual translation code was implemented in place, where the pre-existing code was simply writing and reading \texttt{structs}.
+
+The message structs described in \prettyref{sec:messages-declaration} are not directly transmitted on the wire in neither of the implementations. Instead, a wrapper C-like struct was used to hold the message type, the size of the wrapper struct and of the wrapped one. This approach was left also in the new implementation, as the receiving side must know how much bytes are to be read from the channel. The only difference in the new implementation is that the payload is now represented by an array of \texttt{unsigned char} instead of a \texttt{struct}, in order to accomodate the serialized protobuf data.
+
+
+\section{Experimental evaluation}
+
+The performance evaluation was carried out with the standard UNIX tool \texttt{time}. \prettyref{tab:experiment} contains the experimental values and their average. 
+
+\begin{table}
+    \small
+    \caption{Collection of execution times taken with the standard UNIX tool \texttt{time}. The last row contains the average.}
+    \begin{center}
+        \begin{tabular}{|R{1.5cm}|R{1.5cm}|}
+            \hline
+            \textbf{FIFO} & \textbf{Protobuf} \\ \hline
+            \hline
+            85 ms & 78 ms \\ \hline
+            83 ms & 82 ms \\ \hline
+            80 ms & 82 ms \\ \hline
+            90 ms & 85 ms \\ \hline
+            75 ms & 86 ms \\ \hline
+            72 ms & 90 ms \\ \hline
+            81 ms & 90 ms \\ \hline
+            79 ms & 81 ms \\ \hline
+            77 ms & 82 ms \\ \hline
+            74 ms & 76 ms \\ \hline
+            \hline
+            \textbf{80 ms} & \textbf{82 ms} \\ \hline
+        \end{tabular}
+        \label{tab:experiment}
+    \end{center}
+\end{table}
+
+
+% TODO: Remove
+\subsection{Experimental setup}
+
+\subsection{Results}
+
+
+\section{Conclusions and Future Works}
