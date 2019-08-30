@@ -8,7 +8,7 @@ Refactoring of the BarbequeRTRM $\leftrightarrow$ RTLib communication infrastruc
 \subsection{Summary of the work}
 \begin{itemize}
     \item Definition of a \texttt{proto} file holding all the \emph{Protocol Buffer} declarations.
-    \item Declaration of all the additional configuration options.
+    \item Declaration of the additional configuration options in a \texttt{KConfig} file.
     \item Refactorization of the pre-existing code and CMake files to accomodate such additional configuration.
     \item Separation of the pre-existing implementation and the future one into separate directories.
     \item Implementation of the RTLib side of the infrastructure.
@@ -19,29 +19,29 @@ Refactoring of the BarbequeRTRM $\leftrightarrow$ RTLib communication infrastruc
 
 \section{Design and implementation}
 
-% TODO: FIFO preserved
+Before describing all the implementation choices, it's worth noting that \emph{Protocol Buffers} are just a mechanism aimed to ease the process of serializing structured data. For this reasons, the actual communication channel -- i.e., the underlying FIFO -- was left untouched.
 
 \subsection{Messages declaration}
 \label{sec:messages-declaration}
 
-The pre-existing code featured a series of native C-style \texttt{structs} used to represent each type of message together with some \texttt{enums} to limit the values of some fields. The adopted approach was to translate all the message type \texttt{structs} into a single protobuf \texttt{message}, in order to limit the number of types declared\footnote{Note that the type of the message is still clearly identifiable by one of the header fields.}. This was suggested also by the specific serialization technique of the adopted version 3 of the framework: scalar fields are only explicitly serialized if their value is different from the default one, so the unset fields are not actually transmitted. A separate \texttt{message} was used to translate the message header and the other message-specific \texttt{structs}, e.g.,  the constraints. The original C-style enums were left, and the corresponding fields were translated into simple 32-bits unsigned integers.
+The pre-existing code featured a series of native C-style \texttt{structs} used to represent each type of message together with some \texttt{enums} to limit the values of some fields. The adopted approach was to translate all the message type \texttt{structs} into a single protobuf \texttt{message}, in order to limit the number of types declared\footnote{Note that the type of a message is still clearly identifiable by one of the header fields.}. This was suggested also by the specific serialization technique of the adopted version 3 of the framework: scalar fields are only explicitly serialized if their value is different from the default one, so the unset fields are not actually transmitted. A separate \texttt{message} was used to translate the message header and the other message-specific \texttt{structs}, e.g.,  the constraints. The original C-style enums were left, and the corresponding fields were translated into simple 32-bits unsigned integers.
 
 Since some response types carry additional fields compared to the \emph{standard} response type, an additional \texttt{enum} field was added to the protobuf header in order to correctly translate these responses back and forth between \texttt{structs} and protobuf classes.
 
 \subsection{Implementation}
 
-In order to speedup implementation, a \emph{helper} class composed of only static member functions was used. This class was originally conceived to hold all the conversion code from struct to protobuf. This idea has later been dropped, because contrary to expectations it was generating a lot of repeated code. The only member functions left in the class were the ones related to the header translation, as the header is present in almost everything that is serialized and deserialized on and from the wire. The actual translation code was implemented in place, where the pre-existing code was simply writing and reading \texttt{structs}.
+In order to speedup implementation, a \emph{helper} class composed of only static member functions was used, called \texttt{PBMessageFactory}. This class was originally conceived to hold all the conversion code from struct to protobuf. This idea has later been dropped, because contrary to expectations it was generating a lot of repeated code. The only member functions left in the class were the ones related to the header translation, as the header is present in almost everything that is serialized and deserialized on and from the wire. The actual translation code was implemented in place, where the pre-existing code was simply writing and reading \texttt{structs}.
 
-The message structs described in \prettyref{sec:messages-declaration} are not directly transmitted on the wire in neither of the implementations. Instead, a wrapper C-like struct was used to hold the message type, the size of the wrapper struct and of the wrapped one. This approach was left also in the new implementation, as the receiving side must know how much bytes are to be read from the channel. The only difference in the new implementation is that the payload is now represented by an array of \texttt{unsigned char} instead of a \texttt{struct}, in order to accomodate the serialized protobuf data.
+The message structs described in \prettyref{sec:messages-declaration} were not directly transmitted on the wire: a wrapper C-like struct was used to hold the message type, the size of the wrapper struct and of the wrapped one. This approach was left also in the new implementation, as the receiving side must know how much bytes are to be read from the channel. The only difference in the new implementation is that the payload is now represented by an array of \texttt{unsigned char} instead of a \texttt{struct}, in order to accomodate the serialized protobuf data.
 
+\newpage
 
 \section{Experimental evaluation}
 
 The performance evaluation was carried out with the standard UNIX tool \texttt{time}. \prettyref{tab:experiment} contains the experimental values and their average. 
 
-\begin{table}
+\begin{table}[h!]
     \small
-    \caption{Collection of execution times taken with the standard UNIX tool \texttt{time}. The last row contains the average.}
     \begin{center}
         \begin{tabular}{|R{1.5cm}|R{1.5cm}|}
             \hline
@@ -60,15 +60,13 @@ The performance evaluation was carried out with the standard UNIX tool \texttt{t
             \hline
             \textbf{80 ms} & \textbf{82 ms} \\ \hline
         \end{tabular}
+        \caption{Collection of execution times taken with the standard UNIX tool \texttt{time}. The last row contains the average. The slightly higher value of the protobuf average could be purely coincidental or could be due to protobuf data-filling functions requiring more instructions.}
         \label{tab:experiment}
     \end{center}
 \end{table}
 
-
-% TODO: Remove
-\subsection{Experimental setup}
-
-\subsection{Results}
-
-
 \section{Conclusions and Future Works}
+
+% TODO: Memory optimization
+
+The current implementation suffers from poorly optimized memory usage: the array used to hold the serialized protobuf data is statically sized and part of the wrapper \texttt{struct}. Since such wrapper \texttt{structs} are always declared as local variables, the array is allocated on the stack. The size of the array, 1 KiB, is not a problem for a common x86 machine -- the target platform of this project -- but it could be for an embedded system. For this reason, a smarter approach would be to separate the array from the wrapper struct and to allocate the array on the heap, sizing it so that it exactly fits the serialized data. The actual transmission would be then broken into two parts: first the wrapper \texttt{struct}, then the array.
