@@ -21,7 +21,7 @@ Before describing all the implementation choices, it's worth noting that \emph{P
 
 \subsection{Configuration}
 
-On of the first step was to add the configuration option -- accessible via \texttt{make menuconfig} -- that allows to choose between the old \emph{FIFO-only} implementation and the new \emph{Protobuf-and-FIFO} one. Then the original code underwent a reorganization, so that the files of the two implementations were separated into different directories. This was followed by a tweak in the CMake files, in order to include the correct directories in the build process.
+One of the first steps was to add the configuration option -- accessible via \texttt{make menuconfig} -- that allows to choose between the old \emph{FIFO-only} implementation and the new \emph{Protobuf-and-FIFO} one. Then the original code underwent a reorganization, so that the files of the two implementations were separated into different directories. This was followed by a tweak in the CMake files, in order to include the correct directories in the build process.
 
 \subsection{Messages declaration}
 \label{sec:messages-declaration}
